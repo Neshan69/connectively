@@ -7,6 +7,14 @@
 **Report date:** 2026-10-22
 **Target stack (per owner):** Full-stack, **React + TypeScript (TypeScript is kept - no conversion to JavaScript)**
 
+> **Update 2026-10-22 - Milestone 2: multi-page React application.**
+> `react-router-dom` v7 is installed and the studio is now a real multi-page app:
+> 7 routes (`/`, `/login`, `/signup`, `/messages`, `/profile`, `/settings`, `*`) all
+> rendered inside one shared shell (`src/layouts/AppLayout.tsx`) that keeps the NNN
+> Studio branding on every screen. The original Stitch hub is still the home page and
+> still renders pixel-identically. Login and Signup validate in the browser and say
+> clearly that no backend exists.
+
 > **Update 2026-10-22 - Stitch design integrated into React.**
 > The Stitch design is no longer a standalone HTML page: `index.html` is now a Vite
 > shell and the interface is rendered by React components in `src/components/`.
@@ -29,17 +37,17 @@ messaging, calling, tests and CI**. The island buttons and feature cards are wir
 honest acknowledgement panels that state what each module still needs, so nothing
 pretends to work that does not.
 
-**Overall completion: ~15%** (up from ~8%)
+**Overall completion: ~28%** (up from ~15%)
 
 | Layer | Completion | Notes |
 |---|---|---|
 | Product/UX design | 75% | The hub is fully ported; the other 19 screens are still designed only as a route list |
-| React front-end | 20% | Hub, island navigation, brand island, theme system and reusable card/button components |
+| React front-end | 45% | Hub, island navigation, brand island, theme system, reusable card/button components, router shell + 7 routed pages |
 | Design system | 55% | Tokens live in `src/index.css`; Tailwind is still CDN-loaded |
 | Backend API | 0% | Does not exist |
 | Database / models | 0% | Does not exist |
 | Real-time (chat + calls) | 0% | Does not exist |
-| Auth | 0% | Does not exist |
+| Auth | 10% | Login/signup forms validate in the browser only — no session, no server |
 | Testing / CI / deploy | 0% | Does not exist |
 
 ---
@@ -52,18 +60,27 @@ pretends to work that does not.
 |---|---|---|---|
 | `index.html` | 2.1 kB | **Vite shell now.** Keeps the original `<head>` (Tailwind CDN + `darkMode: 'class'`, Material Symbols, apple-grid body classes). The body markup was replaced by `<div id="root">` + `<script type="module" src="/src/main.tsx">`. Two bugs were fixed: the `tailwind.config` assignment was moved **after** the CDN script (it previously threw `ReferenceError: tailwind is not defined` and silently lost `darkMode:'class'`), and a pre-paint script restores the saved theme before React mounts. | Keep. Do not paste the design back into it. |
 | `docs/stitch-original.html` | 25 kB | **Byte-identical backup of the original Stitch document.** Serves at `/docs/stitch-original.html` and is used as the visual parity reference. | Keep as reference. |
-| `src/App.tsx` | 1.2 kB | Composes the design: `AmbientOrbs`, `BrandIsland`, `IslandNav`, `StudioHub`, `ActionToast`, `useTheme`. | Extends into the router shell. |
+| `src/App.tsx` | 1.5 kB | **Router entry.** `BrowserRouter` + `Routes` declaring the 7 milestone routes: `/`, `/login`, `/signup`, `/messages`, `/profile`, `/settings`, `*`. Every route renders inside `AppLayout` via `<Outlet />`. | Keep. Extend the route table as pages land. |
 | `src/main.tsx` | 230 B | Vite entry, unchanged from the scaffold (imports `./App.tsx`). | Keep. |
+| `src/layouts/AppLayout.tsx` | 2.0 kB | **Shared shell** for every route: ambient orbs, brand island, dynamic-island nav, theme provider mount and the routed `<Outlet />`. Guarantees the NNN Studio chrome is present on every screen. | Keep. |
+| `src/pages/` | 7 files | `HomePage`, `LoginPage`, `SignupPage`, `MessagesPage`, `ProfilePage`, `SettingsPage`, `NotFoundPage`. | Grow one file per new route. |
+| `src/components/GlassPanel.tsx` | 0.4 kB | Shared frosted-glass surface (`glass-card` styling) reused by the hub and every new page. | Keep. |
+| `src/components/AuthCard.tsx` | 0.6 kB | Shared frame for the login/signup pages (heading, sub-copy, footer slot). | Keep. |
+| `src/components/FormField.tsx` | 1.4 kB | Accessible labelled input with error slot and the show/hide password toggle. | Keep. |
+| `src/components/PlaceholderPanel.tsx` | 0.9 kB | Shared "coming soon" panel used by the messages/profile/settings placeholders. | Keep. |
+| `src/context/StudioUiContext.ts` | 0.4 kB | Context + `useStudioUi()` hook declaration (split from the provider so `react-refresh/only-export-components` stays satisfied). | Keep. |
+| `src/context/StudioUiProvider.tsx` | 1.1 kB | Holds navigation/toast state used by the island nav and quick actions. | Keep. |
+| `src/utils/validation.ts` | 0.6 kB | Client-side email/password validators shared by login and signup. | Keep. |
 | `src/index.css` | 2.2 kB | The Stitch `<style>` block moved here verbatim (`apple-grid`, `glass-card`, `subcard-glass`, `heading-tight`, body font). The old starter rule that capped `#root` at 1126px and centred all text was removed because it broke the design. | Keep. |
 | `src/App.css` | 0.7 kB | Starter rules deleted. Now only the Material Symbols axis and the toast animation. | Keep. |
-| `src/components/` | 9 files | `AmbientOrbs`, `BrandIsland`, `IslandNav`, `IslandButton`, `ModuleCard`, `QuickAction`, `StudioHub`, `ActionToast`. | Grow with each new screen. |
+| `src/components/` | 12 files | `AmbientOrbs`, `BrandIsland`, `IslandNav`, `IslandButton`, `ModuleCard`, `QuickAction`, `StudioHub`, `ActionToast`, `GlassPanel`, `AuthCard`, `FormField`, `PlaceholderPanel`. | Grow with each new screen. |
 | `src/hooks/useTheme.ts` | 1.0 kB | React state for the theme, persists to `localStorage`, toggles the `dark` class on `<html>`. | Keep. |
 | `src/types/studio.ts` | 2.4 kB | Typed module ids + the copy shown for every action that still needs a backend. | Keep. |
 | `src/assets/hero.png` | 13,057 B | Vite starter art, no longer imported. | Delete. |
 | `src/assets/react.svg`, `vite.svg` | — | Vite starter logos, no longer imported. | Delete. |
 | `public/favicon.svg` | 9,522 B | Vite default favicon. | Replace with NNN logo. |
 | `public/icons.svg` | 5,031 B | Vite sprite sheet (used only by the starter `App.tsx`). | Delete with starter. |
-| `package.json` | 711 B | `react ^19.3.1`, `react-dom ^19.3.1`; dev: `vite ^8.3.4`, `@vitejs/plugin-react ^6.1.2`, `typescript ~6.0.3`, `typescript-eslint`, `eslint ^10.13.0`, `globals ^17`. | **Keep TypeScript.** Add router, state, socket, fetch layer. |
+| `package.json` | 780 B | `react ^19.3.1`, `react-dom ^19.3.1`, **`react-router-dom ^7.18.4`**; dev: `vite ^8.3.4`, `@vitejs/plugin-react ^6.1.2`, `typescript ~6.0.3`, `typescript-eslint`, `eslint ^10.13.0`, `globals ^17`. | **Keep TypeScript.** Add state, socket, fetch layer next. |
 | `vite.config.ts` | 161 B | Bare `defineConfig({ plugins: [react()] })` — no path alias, no `/api` proxy. | Add `@` alias + `/api` proxy. |
 | `tsconfig.json` / `tsconfig.app.json` / `tsconfig.node.json` | — | TS project configs, `noUnusedLocals`, `erasableSyntaxOnly`. | **Keep all three** (TypeScript stays). |
 | `eslint.config.js` | 591 B | Targets `**/*.{ts,tsx}` with `typescript-eslint`. | Keep as is. |
@@ -74,12 +91,12 @@ pretends to work that does not.
 
 ### 2.2 What does **not** exist (verified by recursive scan)
 
-- No `server/` / `api/` / `backend/` folder — **no backend at all**
+- No backend at all (no `server/` / `api/` / `backend/` folder)
 - No database schema, no models, no migrations, no seed
-- No router (`react-router` not installed) and no per-screen page components yet
-- No auth (no JWT, no sessions, no OAuth)
+- A router **does** exist now (`react-router-dom` v7, 7 routes wired in `src/App.tsx`); the remaining 13 screens of the 20-screen inventory are still only a route list
+- No auth (no JWT, no sessions, no OAuth) — login/signup are UI-only forms
 - No Socket.IO / WebRTC / any real-time transport
-- No test runner (no Vitest, Jest, Playwright, Cypress), no test files
+- No test runner (no Vitest, Jest, Playwright, Cypress); verification was done with a temporary headless-Chrome CDP script outside the repo
 - No CI workflow (`.github/` absent), no Dockerfile, no `.env` / `.env.example`
 - Tailwind is still loaded from the CDN (no local Tailwind dependency)
 - No `LICENSE`, no `CONTRIBUTING.md`
@@ -134,13 +151,13 @@ Derived from every navigable affordance in `index.html`, plus what a full-stack 
 
 | # | Route | Page | Source in `index.html` | Priority |
 |---|---|---|---|---|
-| 1 | `/login` | Sign In | implied by "My Profile" / online status | P0 |
-| 2 | `/signup` | Create Account | implied | P0 |
+| 1 | `/login` | Sign In | implied by "My Profile" / online status | P0 — ✅ **done (UI only)** |
+| 2 | `/signup` | Create Account | implied | P0 — ✅ **done (UI only)** |
 | 3 | `/forgot-password` | Password Reset Request | implied | P1 |
 | 4 | `/reset-password/:token` | Set New Password | implied | P1 |
 | 5 | `/join/:roomId` | Guest Call Invite Landing | implied by "Quick Connect" | P1 |
 | 6 | `/share/:shareId` | Public Shared Canvas Drop | "interactive canvas drops" copy | P2 |
-| 7 | `*` | 404 / Not Found | — | P1 |
+| 7 | `*` | 404 / Not Found | — | P1 — ✅ **done** |
 
 ### 3.2 Authenticated — Core
 
@@ -148,10 +165,10 @@ Derived from every navigable affordance in `index.html`, plus what a full-stack 
 |---|---|---|---|---|
 | 8 | `/` | **Studio Hub** (the designed screen) | `main` glass card + Quick CTAs | P0 — ✅ **done** |
 | 9 | `/onboarding` | Studio Profile Setup wizard | post-signup flow | P1 |
-| 10 | `/profile` | **My Profile** | "My Profile" island button | P0 |
+| 10 | `/profile` | **My Profile** | "My Profile" island button | P0 — ✅ **placeholder done** |
 | 11 | `/friends` | **Friends & Creative Connections** | "group" island button | P0 |
 | 12 | `/friends/requests` | Pending / Sent Request Queues | sub-view of friends | P1 |
-| 13 | `/messages` | **Messages Inbox** | "Open Messages" CTA | P0 |
+| 13 | `/messages` | **Messages Inbox** | "Open Messages" CTA | P0 — ✅ **placeholder done** |
 | 14 | `/messages/:threadId` | **Encrypted Conversation** (PQ3) | "Compose Message" module card | P0 |
 | 15 | `/call/:roomId` | **HD Video Meeting Room** (4K HDR, 60 fps, Center Stage) | "Start Video Call" / "Video call" CTA | P0 |
 | 16 | `/audio/:roomId` | **Spatial Audio Room** (sub-5 ms, voice isolation) | "Join Audio Room" module card | P1 |
@@ -163,7 +180,7 @@ Derived from every navigable affordance in `index.html`, plus what a full-stack 
 | 17 | `/studio/camera` | **Camera / Capture Studio** | "Camera" island button (active state) | P1 |
 | 18 | `/studio/inspector` | **Inspector** (filters, properties) | "tune" island button | P2 |
 | 19 | `/studio/code` | **Code Panel** (project/script view) | "code" island button | P2 |
-| 20 | `/settings` | **Filters & Settings / Preferences** | "pageview" island button | P1 |
+| 20 | `/settings` | **Filters & Settings / Preferences** | "pageview" island button | P1 — ✅ **placeholder done** |
 
 ### 3.4 Non-route overlays & shared surfaces (components, not pages)
 
@@ -186,7 +203,7 @@ Derived from every navigable affordance in `index.html`, plus what a full-stack 
 
 - **React 19 + Vite 8 with TypeScript — TypeScript stays, no conversion to JavaScript.**
 - **Tailwind via the Play CDN (current state).** Keeping the CDN preserves the design exactly; migrating to Tailwind v4 would rename `bg-gradient-to-*` → `bg-linear-*` and needs a full class audit. Recommended later, with `@custom-variant dark (&:where(.dark, .dark *))` to keep `darkMode: 'class'`.
-- **React Router v7** (declarative, file-based routes).
+- **React Router v7** — ✅ installed (`react-router-dom ^7.18.4`). Declarative `<BrowserRouter>` + `<Routes>` in `src/App.tsx`; the shared shell lives in `src/layouts/AppLayout.tsx` and renders the active page through `<Outlet />`.
 - **State:** Zustand for global client state (auth session, theme, call state, notifications) + TanStack Query for server state/caching.
 - **Realtime:** `socket.io-client`; **media:** native WebRTC (`getUserMedia`, `RTCPeerConnection`) with Socket.IO as the signalling channel.
 - **Forms/validation:** React Hook Form + Zod (same schema shape reused on the server).
@@ -224,9 +241,13 @@ connectly/
 │   └── .env.example
 └── src/
     ├── main.tsx               # entry: providers (Router, Query, Theme, Auth, Socket)
-    ├── App.tsx                # layout shell + island nav + route outlet
+    ├── App.tsx                # ✅ done — BrowserRouter + route table
     ├── api/                   # http client + per-domain api modules
     ├── assets/
+    ├── layouts/
+    │   └── AppLayout.tsx      # ✅ done — shared shell (brand island, island nav, <Outlet/>)
+    ├── pages/                 # ✅ done (7): HomePage, LoginPage, SignupPage,
+    │   │                      # MessagesPage, ProfilePage, SettingsPage, NotFoundPage
     ├── components/
     │   ├── AmbientOrbs.tsx    # ✅ done
     │   ├── BrandIsland.tsx    # ✅ done
@@ -236,16 +257,24 @@ connectly/
     │   ├── QuickAction.tsx    # ✅ done
     │   ├── StudioHub.tsx      # ✅ done (the hub screen)
     │   ├── ActionToast.tsx    # ✅ done
+    │   ├── GlassPanel.tsx     # ✅ done (shared glass surface)
+    │   ├── AuthCard.tsx       # ✅ done (login/signup frame)
+    │   ├── FormField.tsx      # ✅ done (labelled input + password toggle)
+    │   ├── PlaceholderPanel.tsx # ✅ done (coming-soon panel)
     │   ├── call/              # TODO VideoStage, AudioStage, CallControls, ParticipantTile
     │   ├── chat/              # TODO ThreadList, MessageBubble, Composer
     │   └── overlays/          # TODO CommandPalette, NotificationCentre
+    ├── context/
+    │   ├── StudioUiContext.ts # ✅ done (context + useStudioUi hook)
+    │   └── StudioUiProvider.tsx # ✅ done (nav/toast state)
     ├── features/              # TODO auth, profile, friends, messages, calls, studio, settings
     │   └── <feature>/pages/ + components/ + hooks/ + store/
     ├── hooks/useTheme.ts      # ✅ done
-    ├── types/studio.ts        # ✅ done (module ids + action copy)
+    ├── types/studio.ts        # ✅ done (module ids + action copy + STUDIO_ROUTES)
     ├── store/                 # TODO zustand stores (auth, call, notifications)
     ├── styles/                # TODO index.css is still at src/index.css
     └── utils/
+        └── validation.ts      # ✅ done (email + password rules)
 ```
 
 ---
@@ -287,7 +316,9 @@ connectly/
 | 9 | **No tests, no CI** | Medium | Vitest + React Testing Library, Playwright smoke, GitHub Actions |
 | 10 | ~~Dark mode is not persisted~~ **RESOLVED** | — | `useTheme` + `localStorage` + pre-paint inline script in `index.html` |
 | 11 | **Mobile responsiveness of the island nav** | Low | Verified: the layout matches the original at 390 / 768 / 1440 px with no horizontal overflow. The right island still floats over content on narrow screens — add a bottom-bar variant under `md` |
-| 12 | **Tailwind CDN re-generates after React mounts** | Low | Measured 30 ms unstyled window — not perceptible. A local Tailwind build would remove it entirely |
+| 12 | **Tailwind CDN re-generates after React mounts** | Low | Re-measured with an rAF probe: the CDN regenerates the stylesheet in the *same animation frame* as the React mount, so the unstyled window is 0 ms — no visible flash. A local Tailwind build would still remove the CDN dependency entirely |
+| 13 | **New screens are UI-only placeholders** | Medium — `/login` and `/signup` validate locally but no session is created, so nothing is protected | Ship the backend (Slice B) before any route is treated as secure; the forms already say so explicitly |
+| 14 | **No automated test suite** | Medium | Verification for this milestone used a throwaway headless-Chrome CDP script; convert it into Playwright specs in Phase 6 |
 
 ---
 
@@ -307,12 +338,12 @@ connectly/
 - [ ] Set up `server/` (Express, Mongoose, `.env.example`) and a `/api/health` endpoint
 
 ### Phase 1 — Shell + auth (2–3 days)
-- [ ] Add `react-router` and turn `StudioHub` into a route outlet
+- [x] Add `react-router-dom` v7 and turn `StudioHub` into a route outlet
 - [x] Theme provider with persistence
-- [ ] Pages 1–4: sign in, sign up, forgot/reset password
+- [x] Pages 1–2: sign in + sign up (UI only, client-side validation) — pages 3–4 still pending
 - [ ] `User` + `UserSettings` models, JWT access/refresh, `GET /api/auth/me`
 - [ ] Protected-route wrapper, auth store (Zustand)
-- [ ] Page 10: profile (view + edit + avatar upload)
+- [x] Page 10: profile placeholder — real profile (view + edit + avatar upload) still pending
 
 ### Phase 2 — Social graph (2 days)
 - [ ] `Connection` model + friends endpoints
@@ -336,7 +367,7 @@ connectly/
 
 ### Phase 5 — Studio tools + settings (2 days)
 - [ ] Pages 17–19: camera capture, inspector (filters/properties), code panel
-- [ ] Page 20: settings, filters, preferences, privacy, notifications
+- [x] Page 20: settings placeholder — real filters/preferences/privacy/notifications still pending
 - [ ] Command palette (⌘K) with live fuzzy search across routes, friends, threads
 
 ### Phase 6 — Hardening (2 days)
@@ -353,7 +384,8 @@ connectly/
 Build in this order so that every milestone is demoable end-to-end:
 
 1. **Slice A** — ✅ DONE: hub screen ported to React + TypeScript, theme toggle works → *demo: the Stitch design reproduced in React*
-2. **Slice B** — Register/login/profile with a real API + DB → *demo: sign up and persist a profile*
+2. **Slice A2** — ✅ DONE: React Router v7 wired up, shared shell, 7 routes, UI-only login/signup → *demo: click through the whole studio without a reload*
+3. **Slice B** — Register/login/profile with a real API + DB → *demo: sign up and persist a profile*
 3. **Slice C** — Friends + presence → *demo: two browsers see each other online*
 4. **Slice D** — Real-time messaging → *demo: chat between two accounts*
 5. **Slice E** — 1:1 video call → *demo: working WebRTC call*
@@ -365,24 +397,28 @@ Build in this order so that every milestone is demoable end-to-end:
 
 ## 9. Immediate Next Actions (recommended next 3 commits)
 
-1. `feat: render the stitch design through react` — ported components, shell `index.html`, theme toggle (already staged in the working tree)
-2. `feat: add react router and stub the 20 studio routes` — `react-router` dependency, `AppShell` with an `<Outlet />`, protected-route wrapper
+1. ~~`feat: render the stitch design through react`~~ — ✅ done
+2. ~~`feat: add react router and stub the 20 studio routes`~~ — ✅ done for the 7 milestone routes
 3. `feat: stand up the express + mongodb api` — `server/` workspace with `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me` and a `User` model
+4. `feat: wire the auth pages to the real api` — protected-route wrapper, Zustand auth store, session restore
+5. `feat: add the remaining 13 studio routes` — friends, threads, calls, studio tools, forgot/reset password
 
 ---
 
 ## 10. Definition of Done (v1.0)
 
-- [ ] All 20 pages implemented and reachable through the island navigation
+- [ ] All 20 pages implemented and reachable through the island navigation — 7 of 20 done (home, login, signup, messages placeholder, profile placeholder, settings placeholder, 404)
 - [x] TypeScript kept throughout: no `.ts`/`.tsx` converted to JavaScript, `tsconfig*` intact
 - [x] Dark mode persisted and driven by the theme toggle button (`darkMode: 'class'` verified working)
+- [x] Client-side routing with SPA navigation (no full-page reloads) for every shipped route
+- [x] Original Stitch hub preserved — geometry matches the reference at 390 / 768 / 1440 px
 - [ ] Tailwind installed as a dependency (no CDN) — optional, needs a class audit
-- [ ] Auth (register/login/refresh/logout) + protected routes working
+- [ ] Auth (register/login/refresh/logout) + protected routes working — forms validate locally, no server yet
 - [ ] Friends, presence, real-time messaging, and 1:1 + group video calls working
-- [ ] Studio tools (camera, inspector, code) and settings implemented
+- [ ] Studio tools (camera, inspector, code) and settings implemented — settings is a placeholder today
 - [ ] Command palette (⌘K) functional with keyboard navigation
 - [ ] Unit + E2E tests, CI pipeline, and a documented deployment path
-- [ ] `README.md` and this `STATUS.md` updated to reflect the shipped state
+- [x] `README.md` and this `STATUS.md` updated to reflect the shipped state — `STATUS.md` is current; `README.md` is still the Vite template
 
 ---
 

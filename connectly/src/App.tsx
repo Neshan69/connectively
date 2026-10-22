@@ -1,42 +1,35 @@
-import { useState } from 'react'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import AppLayout from './layouts/AppLayout'
+import HomePage from './pages/HomePage'
+import LoginPage from './pages/LoginPage'
+import MessagesPage from './pages/MessagesPage'
+import NotFoundPage from './pages/NotFoundPage'
+import ProfilePage from './pages/ProfilePage'
+import SettingsPage from './pages/SettingsPage'
+import SignupPage from './pages/SignupPage'
 import './App.css'
-import ActionToast from './components/ActionToast'
-import AmbientOrbs from './components/AmbientOrbs'
-import BrandIsland from './components/BrandIsland'
-import IslandNav from './components/IslandNav'
-import StudioHub from './components/StudioHub'
-import { useTheme } from './hooks/useTheme'
-import { STUDIO_ACTIONS, type StudioModuleId } from './types/studio'
 
+/**
+ * Route configuration of the studio.
+ *
+ * Every screen is rendered inside <AppLayout />, which keeps the NNN Studio
+ * branding (background, brand island, floating navigation) on every page.
+ */
 function App() {
-  const { theme, toggleTheme } = useTheme()
-  const [activeModule, setActiveModule] = useState<StudioModuleId | null>(null)
-  const [notice, setNotice] = useState<StudioModuleId | null>(null)
-
-  /** Island buttons and feature cards both open a module through this handler. */
-  const handleSelect = (module: StudioModuleId) => {
-    setActiveModule(module)
-    setNotice(module)
-  }
-
-  const handleDismiss = () => {
-    setNotice(null)
-    setActiveModule(null)
-  }
-
   return (
-    <>
-      <AmbientOrbs />
-      <BrandIsland />
-      <IslandNav
-        theme={theme}
-        onToggleTheme={toggleTheme}
-        activeModule={activeModule}
-        onSelect={handleSelect}
-      />
-      <StudioHub onSelect={handleSelect} />
-      {notice && <ActionToast action={STUDIO_ACTIONS[notice]} onDismiss={handleDismiss} />}
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
 

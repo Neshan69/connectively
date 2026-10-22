@@ -1,26 +1,27 @@
+import { useLocation } from 'react-router-dom'
 import IslandButton from './IslandButton'
-import type { StudioModuleId, Theme } from '../types/studio'
+import { useStudioUi } from '../context/StudioUiContext'
+import type { Theme } from '../types/studio'
 
 type IslandNavProps = {
   theme: Theme
   onToggleTheme: () => void
-  /** Which studio tool is currently selected, if any. */
-  activeModule: StudioModuleId | null
-  onSelect: (module: StudioModuleId) => void
 }
 
 /**
  * The vertical "Dynamic Island" navigation on the right edge.
- * It is the single entry point for every screen of the future app.
+ * It is the single entry point for every screen of the studio.
  */
-export default function IslandNav({
-  theme,
-  onToggleTheme,
-  activeModule,
-  onSelect,
-}: IslandNavProps) {
+export default function IslandNav({ theme, onToggleTheme }: IslandNavProps) {
+  const { activeModule, select } = useStudioUi()
+  const location = useLocation()
+
   const isDark = theme === 'dark'
   const themeLabel = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'
+
+  /** A button is lit when it is the selected tool or the screen you are on. */
+  const isActive = (module: string, path: string) =>
+    activeModule === module || location.pathname === path
 
   return (
     <aside aria-label="Vertical Dynamic Island Navigation" className="fixed right-6 top-1/2 -translate-y-1/2 z-50">
@@ -37,7 +38,12 @@ export default function IslandNav({
         </div>
 
         {/* 2. Profile section button / avatar trigger */}
-        <IslandButton label="My Profile" onClick={() => onSelect('profile')} padding="p-2">
+        <IslandButton
+          label="My Profile"
+          onClick={() => select('profile')}
+          padding="p-2"
+          active={isActive('profile', '/profile')}
+        >
           <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#0071E3] to-[#5AC8FA] text-white flex items-center justify-center shadow-xs">
             <span className="material-symbols-outlined text-[17px]">account_circle</span>
           </div>
@@ -62,51 +68,51 @@ export default function IslandNav({
         <IslandButton
           label="Friends & Creative Connections"
           icon="group"
-          onClick={() => onSelect('friends')}
+          onClick={() => select('friends')}
         />
 
         {/* Divider Line */}
         <div className="w-4 h-[1px] bg-neutral-200/80 dark:bg-neutral-700/60" />
 
         {/* 5. Remaining island tools intact */}
-        {/* Canvas Tool Item (Active) */}
+        {/* Canvas Tool Item (Active) - the camera is the current studio tool */}
         <IslandButton
           label="Camera"
           icon="photo_camera"
-          active={activeModule === 'camera'}
-          onClick={() => onSelect('camera')}
+          active
+          onClick={() => select('camera')}
         />
 
         {/* Inspector Tool Item */}
         <IslandButton
           label="Inspector"
           icon="tune"
-          active={activeModule === 'inspector'}
-          onClick={() => onSelect('inspector')}
+          active={isActive('inspector', '/inspector')}
+          onClick={() => select('inspector')}
         />
 
         {/* Code Tool Item */}
         <IslandButton
           label="Code"
           icon="code"
-          active={activeModule === 'code'}
-          onClick={() => onSelect('code')}
+          active={isActive('code', '/code')}
+          onClick={() => select('code')}
         />
 
         {/* Command Palette (Cmd+K) Item */}
         <IslandButton
           label="Command (Cmd+K)"
           icon="keyboard_command_key"
-          active={activeModule === 'command-palette'}
-          onClick={() => onSelect('command-palette')}
+          active={isActive('command-palette', '/command-palette')}
+          onClick={() => select('command-palette')}
         />
 
         {/* Settings Filter / Preferences Item */}
         <IslandButton
           label="Filters & Settings"
           icon="pageview"
-          active={activeModule === 'settings'}
-          onClick={() => onSelect('settings')}
+          active={isActive('settings', '/settings')}
+          onClick={() => select('settings')}
         />
       </div>
     </aside>

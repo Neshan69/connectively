@@ -31,10 +31,20 @@ export type StudioAction = {
   note: string
 }
 
+/**
+ * Modules that already have a screen. Selecting one of them navigates there
+ * instead of showing the "not built yet" notice.
+ */
+export const STUDIO_ROUTES: Partial<Record<StudioModuleId, string>> = {
+  profile: '/profile',
+  messages: '/messages',
+  settings: '/settings',
+}
+
 export const STUDIO_ACTIONS: Record<StudioModuleId, StudioAction> = {
   profile: {
     title: 'My Profile',
-    note: 'Profile screen is not built yet - it needs the auth API and a user model.',
+    note: 'The profile screen is a placeholder in this milestone - it needs the auth API and a user model.',
   },
   friends: {
     title: 'Friends & Creative Connections',
@@ -54,11 +64,11 @@ export const STUDIO_ACTIONS: Record<StudioModuleId, StudioAction> = {
   },
   'command-palette': {
     title: 'Command Palette',
-    note: 'Command palette is not built yet - it will run on the router once pages exist.',
+    note: 'Command palette is not built yet - it will run on the router once every screen exists.',
   },
   settings: {
     title: 'Filters & Settings',
-    note: 'Settings screen is not built yet - it needs a preferences API.',
+    note: 'The settings screen is a placeholder in this milestone - it needs a preferences API.',
   },
   'video-call': {
     title: 'Start Video Call',
@@ -70,7 +80,7 @@ export const STUDIO_ACTIONS: Record<StudioModuleId, StudioAction> = {
   },
   messages: {
     title: 'Compose Message',
-    note: 'Messaging is not connected yet - it needs the messages API and the socket layer.',
+    note: 'The messages screen is a placeholder in this milestone - it needs the messages API and the socket layer.',
   },
   'quick-connect': {
     title: 'Quick Connect',
