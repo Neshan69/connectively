@@ -5,23 +5,37 @@
 **Product title in design:** *Creative Studio Canvas* / *FaceTime & Studio Connect*
 **Brand:** NNN STUDIO ("NNN Core Active")
 **Report date:** 2026-10-22
-**Target stack (per owner):** Full-stack, **React (JavaScript — no TypeScript)**
+**Target stack (per owner):** Full-stack, **React + TypeScript (TypeScript is kept - no conversion to JavaScript)**
+
+> **Update 2026-10-22 - Stitch design integrated into React.**
+> The Stitch design is no longer a standalone HTML page: `index.html` is now a Vite
+> shell and the interface is rendered by React components in `src/components/`.
+> The untouched original design is preserved at `docs/stitch-original.html`.
+> Section 2 (current state) has been updated to match, and the "convert to
+> JavaScript" items in the roadmap were removed.
 
 ---
 
 ## 1. Executive Summary
 
-The project is **a design prototype plus an untouched framework scaffold**. Roughly **90% of the product UI has been designed inside one 25 KB standalone `index.html` file** (Apple-style glassmorphic dark theme, Tailwind CDN, Material Symbols), but **none of that design has been ported into the React app yet**. The React app still contains the stock Vite starter screen.
+The Stitch design has been **integrated into the React application**. `index.html` is now a
+Vite shell and the interface renders through reusable TypeScript components in
+`src/components/`. The untouched original design is preserved at
+`docs/stitch-original.html` and is served at `/docs/stitch-original.html` as the visual
+reference.
 
-There is **no backend, no database, no routing, no authentication, no real-time layer, no tests, no CI, and no git repository**. The project is currently at the point where the UI blueprint is done and the engineering build-out has to start.
+What still does not exist: **backend, database, routing, authentication, real-time
+messaging, calling, tests and CI**. The island buttons and feature cards are wired to
+honest acknowledgement panels that state what each module still needs, so nothing
+pretends to work that does not.
 
-**Overall completion: ~8%**
+**Overall completion: ~15%** (up from ~8%)
 
 | Layer | Completion | Notes |
 |---|---|---|
-| Product/UX design | 70% | One fully-styled hub screen exists as raw HTML |
-| React front-end | 3% | Stock Vite template only |
-| Design system | 25% | Tokens exist as inline CSS in one file, not extracted |
+| Product/UX design | 75% | The hub is fully ported; the other 19 screens are still designed only as a route list |
+| React front-end | 20% | Hub, island navigation, brand island, theme system and reusable card/button components |
+| Design system | 55% | Tokens live in `src/index.css`; Tailwind is still CDN-loaded |
 | Backend API | 0% | Does not exist |
 | Database / models | 0% | Does not exist |
 | Real-time (chat + calls) | 0% | Does not exist |
@@ -36,19 +50,23 @@ There is **no backend, no database, no routing, no authentication, no real-time 
 
 | File | Size | State | Action needed |
 |---|---|---|---|
-| `index.html` | 25,223 B | **The real product design.** Full "FaceTime & Studio Connect" hub with left brand island + right Dynamic Island nav + 3 module cards + quick actions + working theme toggle. Uses Tailwind CDN v3 (`?plugins=forms,container-queries`), Material Symbols Outlined, inline `<style>` design tokens, inline `<script>` theme logic. | **Dissect into React components.** Delete inline `<script>`/`<style>` after porting. |
-| `src/App.tsx` | 3,646 B | **Stock Vite starter template** (`hero.png`, React logo, Vite logo, "Get started", counter button). Zero project code. | Replace entirely. |
-| `src/main.tsx` | 230 B | Vite default entry: `createRoot(...).render(<StrictMode><App /></StrictMode>)`. | Keep, add router + providers. |
-| `src/index.css` | 2,169 B | Vite starter CSS (`--accent: #aa3bff`, `#root { width: 1126px }`, Vite gradient hero). | Replace with Tailwind v4 + design tokens. |
-| `src/App.css` | 2,891 B | Vite starter styles (`.hero`, `.ticks`, `#next-steps`). | Delete. |
-| `src/assets/hero.png` | 13,057 B | Vite starter art. | Delete. |
-| `src/assets/react.svg`, `vite.svg` | — | Vite starter logos. | Delete. |
+| `index.html` | 2.1 kB | **Vite shell now.** Keeps the original `<head>` (Tailwind CDN + `darkMode: 'class'`, Material Symbols, apple-grid body classes). The body markup was replaced by `<div id="root">` + `<script type="module" src="/src/main.tsx">`. Two bugs were fixed: the `tailwind.config` assignment was moved **after** the CDN script (it previously threw `ReferenceError: tailwind is not defined` and silently lost `darkMode:'class'`), and a pre-paint script restores the saved theme before React mounts. | Keep. Do not paste the design back into it. |
+| `docs/stitch-original.html` | 25 kB | **Byte-identical backup of the original Stitch document.** Serves at `/docs/stitch-original.html` and is used as the visual parity reference. | Keep as reference. |
+| `src/App.tsx` | 1.2 kB | Composes the design: `AmbientOrbs`, `BrandIsland`, `IslandNav`, `StudioHub`, `ActionToast`, `useTheme`. | Extends into the router shell. |
+| `src/main.tsx` | 230 B | Vite entry, unchanged from the scaffold (imports `./App.tsx`). | Keep. |
+| `src/index.css` | 2.2 kB | The Stitch `<style>` block moved here verbatim (`apple-grid`, `glass-card`, `subcard-glass`, `heading-tight`, body font). The old starter rule that capped `#root` at 1126px and centred all text was removed because it broke the design. | Keep. |
+| `src/App.css` | 0.7 kB | Starter rules deleted. Now only the Material Symbols axis and the toast animation. | Keep. |
+| `src/components/` | 9 files | `AmbientOrbs`, `BrandIsland`, `IslandNav`, `IslandButton`, `ModuleCard`, `QuickAction`, `StudioHub`, `ActionToast`. | Grow with each new screen. |
+| `src/hooks/useTheme.ts` | 1.0 kB | React state for the theme, persists to `localStorage`, toggles the `dark` class on `<html>`. | Keep. |
+| `src/types/studio.ts` | 2.4 kB | Typed module ids + the copy shown for every action that still needs a backend. | Keep. |
+| `src/assets/hero.png` | 13,057 B | Vite starter art, no longer imported. | Delete. |
+| `src/assets/react.svg`, `vite.svg` | — | Vite starter logos, no longer imported. | Delete. |
 | `public/favicon.svg` | 9,522 B | Vite default favicon. | Replace with NNN logo. |
-| `public/icons.svg` | 5,031 B | Vite sprite sheet (used only by starter `App.tsx`). | Delete with starter. |
-| `package.json` | 711 B | `react ^19.3.1`, `react-dom ^19.3.1`; dev: `vite ^8.3.4`, `@vitejs/plugin-react ^6.1.2`, `typescript ~6.0.3`, `typescript-eslint`, `eslint ^10.13.0`, `globals ^17`. | **Remove TypeScript**, add Tailwind, router, state, socket, axios/fetch layer. |
-| `vite.config.ts` | 161 B | Bare `defineConfig({ plugins: [react()] })` — no path alias, no Tailwind plugin, no proxy. | Rename to `vite.config.js`; add `@` alias + `/api` proxy + Tailwind plugin. |
-| `tsconfig.json` / `tsconfig.app.json` / `tsconfig.node.json` | — | Strict TS project configs, `noUnusedLocals`, `erasableSyntaxOnly`. | **Delete all three** (no-TS project). |
-| `eslint.config.js` | 591 B | Targets `**/*.{ts,tsx}` only, uses `typescript-eslint`. | Retarget to `**/*.{js,jsx}`, drop `typescript-eslint`. |
+| `public/icons.svg` | 5,031 B | Vite sprite sheet (used only by the starter `App.tsx`). | Delete with starter. |
+| `package.json` | 711 B | `react ^19.3.1`, `react-dom ^19.3.1`; dev: `vite ^8.3.4`, `@vitejs/plugin-react ^6.1.2`, `typescript ~6.0.3`, `typescript-eslint`, `eslint ^10.13.0`, `globals ^17`. | **Keep TypeScript.** Add router, state, socket, fetch layer. |
+| `vite.config.ts` | 161 B | Bare `defineConfig({ plugins: [react()] })` — no path alias, no `/api` proxy. | Add `@` alias + `/api` proxy. |
+| `tsconfig.json` / `tsconfig.app.json` / `tsconfig.node.json` | — | TS project configs, `noUnusedLocals`, `erasableSyntaxOnly`. | **Keep all three** (TypeScript stays). |
+| `eslint.config.js` | 591 B | Targets `**/*.{ts,tsx}` with `typescript-eslint`. | Keep as is. |
 | `README.md` | 2,345 B | Unmodified Vite template README. | Rewrite as project README. |
 | `.gitignore` | 253 B | Vite default. | Add `.env`, uploads, logs. |
 | `package-lock.json` | 96 KB | Locked deps. | Re-lock after dep changes. |
@@ -58,18 +76,21 @@ There is **no backend, no database, no routing, no authentication, no real-time 
 
 - No `server/` / `api/` / `backend/` folder — **no backend at all**
 - No database schema, no models, no migrations, no seed
-- No router (`react-router` not installed), no pages directory, no components directory, no context/store
+- No router (`react-router` not installed) and no per-screen page components yet
 - No auth (no JWT, no sessions, no OAuth)
 - No Socket.IO / WebRTC / any real-time transport
 - No test runner (no Vitest, Jest, Playwright, Cypress), no test files
 - No CI workflow (`.github/` absent), no Dockerfile, no `.env` / `.env.example`
-- **No git repository** (`E:\fullstact_l\connectly\.git` does not exist) — nothing is version-controlled
-- No Tailwind installed as a dependency (only the CDN script inside `index.html`)
+- Tailwind is still loaded from the CDN (no local Tailwind dependency)
 - No `LICENSE`, no `CONTRIBUTING.md`
 
-### 2.3 Design inventory extracted from `index.html`
+> Note: the git repository now exists at `E:\fullstact_l` (remote
+> `github.com/Neshan69/connectively.git`, branch `main`). It was created after
+> the first version of this report.
 
-This is the authoritative source of truth for the UI and must be preserved during the port.
+### 2.3 Design inventory (source: `docs/stitch-original.html`, now rendered by React)
+
+This is the authoritative source of truth for the UI and must be preserved during any future work.
 
 **Global chrome**
 - Left vertical brand island: external Google-hosted logo image, pulsing "NNN Core Active" dot, vertical "NNN STUDIO" wordmark.
@@ -125,7 +146,7 @@ Derived from every navigable affordance in `index.html`, plus what a full-stack 
 
 | # | Route | Page | Source in `index.html` | Priority |
 |---|---|---|---|---|
-| 8 | `/` | **Studio Hub** (the designed screen) | `main` glass card + Quick CTAs | P0 |
+| 8 | `/` | **Studio Hub** (the designed screen) | `main` glass card + Quick CTAs | P0 — ✅ **done** |
 | 9 | `/onboarding` | Studio Profile Setup wizard | post-signup flow | P1 |
 | 10 | `/profile` | **My Profile** | "My Profile" island button | P0 |
 | 11 | `/friends` | **Friends & Creative Connections** | "group" island button | P0 |
@@ -159,12 +180,12 @@ Derived from every navigable affordance in `index.html`, plus what a full-stack 
 
 ---
 
-## 4. Target Architecture (Full Stack, React + JavaScript)
+## 4. Target Architecture (Full Stack, React + TypeScript)
 
 ### 4.1 Front-end
 
-- **React 19 + Vite 8, JavaScript only (`.jsx`) — no TypeScript.**
-- **Tailwind CSS v4** installed as a dependency (replacing the CDN script), configured CSS-first via `@theme` in `index.css`; keep `darkMode: 'class'` semantics with `@custom-variant dark (&:where(.dark, .dark *));`.
+- **React 19 + Vite 8 with TypeScript — TypeScript stays, no conversion to JavaScript.**
+- **Tailwind via the Play CDN (current state).** Keeping the CDN preserves the design exactly; migrating to Tailwind v4 would rename `bg-gradient-to-*` → `bg-linear-*` and needs a full class audit. Recommended later, with `@custom-variant dark (&:where(.dark, .dark *))` to keep `darkMode: 'class'`.
 - **React Router v7** (declarative, file-based routes).
 - **State:** Zustand for global client state (auth session, theme, call state, notifications) + TanStack Query for server state/caching.
 - **Realtime:** `socket.io-client`; **media:** native WebRTC (`getUserMedia`, `RTCPeerConnection`) with Socket.IO as the signalling channel.
@@ -187,6 +208,7 @@ Derived from every navigable affordance in `index.html`, plus what a full-stack 
 connectly/
 ├── index.html                 # → becomes the Vite shell only (meta, fonts, #root)
 ├── package.json               # root workspace: "client" + "server" scripts
+├── docs/stitch-original.html  # untouched reference copy of the Stitch design
 ├── server/
 │   ├── src/
 │   │   ├── index.js           # bootstrap, http + socket.io
@@ -201,21 +223,28 @@ connectly/
 │   │   └── validation/        # zod schemas
 │   └── .env.example
 └── src/
-    ├── main.jsx               # entry: providers (Router, Query, Theme, Auth, Socket)
-    ├── App.jsx                # layout shell + island nav + route outlet
+    ├── main.tsx               # entry: providers (Router, Query, Theme, Auth, Socket)
+    ├── App.tsx                # layout shell + island nav + route outlet
     ├── api/                   # http client + per-domain api modules
     ├── assets/
     ├── components/
-    │   ├── layout/            # BrandIsland, IslandNav, AppShell, ThemeToggle
-    │   ├── ui/                # GlassCard, SubCard, ModuleCard, SpecPill, Button, Modal…
-    │   ├── call/              # VideoStage, AudioStage, CallControls, ParticipantTile
-    │   ├── chat/              # ThreadList, MessageBubble, Composer
-    │   └── overlays/          # CommandPalette, Toasts, NotificationCentre
-    ├── features/              # auth, profile, friends, messages, calls, studio, settings
+    │   ├── AmbientOrbs.tsx    # ✅ done
+    │   ├── BrandIsland.tsx    # ✅ done
+    │   ├── IslandNav.tsx      # ✅ done
+    │   ├── IslandButton.tsx   # ✅ done (reusable island button + tooltip)
+    │   ├── ModuleCard.tsx     # ✅ done (video / audio / messages variants)
+    │   ├── QuickAction.tsx    # ✅ done
+    │   ├── StudioHub.tsx      # ✅ done (the hub screen)
+    │   ├── ActionToast.tsx    # ✅ done
+    │   ├── call/              # TODO VideoStage, AudioStage, CallControls, ParticipantTile
+    │   ├── chat/              # TODO ThreadList, MessageBubble, Composer
+    │   └── overlays/          # TODO CommandPalette, NotificationCentre
+    ├── features/              # TODO auth, profile, friends, messages, calls, studio, settings
     │   └── <feature>/pages/ + components/ + hooks/ + store/
-    ├── hooks/
-    ├── store/
-    ├── styles/                # index.css (tokens), tailwind theme
+    ├── hooks/useTheme.ts      # ✅ done
+    ├── types/studio.ts        # ✅ done (module ids + action copy)
+    ├── store/                 # TODO zustand stores (auth, call, notifications)
+    ├── styles/                # TODO index.css is still at src/index.css
     └── utils/
 ```
 
@@ -247,34 +276,39 @@ connectly/
 
 | # | Risk | Impact | Mitigation |
 |---|---|---|---|
-| 1 | **Design lives only in one 25 KB `index.html`** | High — porting loss, no component reuse | Treat as the spec; port module-by-module into a component library, then delete the prototype file |
-| 2 | **TypeScript is installed but the target is plain JavaScript** | High — build/lint will fail after conversion | Delete `tsconfig*.json`, rename `.tsx → .jsx`, drop `typescript`/`typescript-eslint`, change build script to `vite build` |
-| 3 | **Tailwind only via CDN** | Medium — CDN is slow, no purge, no design tokens, `tailwind.config` is JS in `<head>` | Install Tailwind v4 + `@tailwindcss/vite`; move tokens to `@theme`; add `@custom-variant dark` |
+| 1 | ~~Design lives only in one 25 KB `index.html`~~ **RESOLVED** | — | The design now lives in `src/components/*` and renders through React. `docs/stitch-original.html` keeps the reference copy. |
+| 2 | ~~TypeScript is installed but the target is plain JavaScript~~ **RESOLVED** | — | Decision changed: TypeScript is kept. `tsconfig*` files, `.tsx` components and `typescript-eslint` all stay. |
+| 3 | **Tailwind only via CDN** | Medium — CDN is slow, no purge, the `tailwind.config` script must stay after the CDN script or the config is silently dropped | Migrate to Tailwind v4 + `@tailwindcss/vite` later; audit `bg-gradient-to-*` → `bg-linear-*` and add `@custom-variant dark` |
 | 4 | **External hotlinked brand logo** (`googleusercontent.com`) | Medium — breaks offline, leaks a request to Google | Download to `src/assets/brand-logo.png` |
-| 5 | **No git repository** | High — no history, no rollback, no collaboration | `git init`, commit the scaffold baseline before refactoring |
+| 5 | ~~No git repository~~ **RESOLVED** | — | Repo exists at `E:\fullstact_l`, remote `github.com/Neshan69/connectively.git`, branch `main`. |
 | 6 | **No backend at all** | High — every page beyond the hub is blocked | Stand up `server/` with auth + models first (vertical slice) |
 | 7 | **WebRTC signalling, TURN, and encryption claims are unbacked** | Medium — "PQ3 / end-to-end encrypted" is marketing copy in the prototype | Either implement real E2EE (Web Crypto) or reword to honest "encrypted in transit" |
 | 8 | **"4K HDR", "sub-5 ms latency", "60 fps"** are design copy only | Medium | Keep as UI copy, but do not present as implemented capabilities |
-| 9 | **No tests, no lint on JS, no CI** | Medium | Vitest + React Testing Library, Playwright smoke, GitHub Actions |
-| 10 | **Dark mode is not persisted** | Low | Theme provider + `localStorage` + pre-paint inline script |
-| 11 | **Mobile responsiveness untested** for the island nav | Low | The fixed right island overlaps content on small screens — add a bottom bar variant under `md` |
+| 9 | **No tests, no CI** | Medium | Vitest + React Testing Library, Playwright smoke, GitHub Actions |
+| 10 | ~~Dark mode is not persisted~~ **RESOLVED** | — | `useTheme` + `localStorage` + pre-paint inline script in `index.html` |
+| 11 | **Mobile responsiveness of the island nav** | Low | Verified: the layout matches the original at 390 / 768 / 1440 px with no horizontal overflow. The right island still floats over content on narrow screens — add a bottom-bar variant under `md` |
+| 12 | **Tailwind CDN re-generates after React mounts** | Low | Measured 30 ms unstyled window — not perceptible. A local Tailwind build would remove it entirely |
 
 ---
 
 ## 7. Roadmap
 
-### Phase 0 — Foundation cleanup (½–1 day)
-- [ ] `git init` + first commit of the current scaffold
-- [ ] Convert TypeScript → JavaScript: `App.tsx → App.jsx`, `main.tsx → main.jsx`, delete `tsconfig*.json`, `vite.config.ts → vite.config.js`, strip TS from `eslint.config.js` and `package.json` (`build` → `vite build`)
-- [ ] Install `tailwindcss@4` + `@tailwindcss/vite`; delete the CDN `<script>` from `index.html`; add `@custom-variant dark`
-- [ ] Extract the design tokens from the prototype's inline `<style>` into `src/styles/index.css` (`@theme`) and a `theme.js` constants file
+### Phase 0 — Foundation cleanup ✅ DONE
+- [x] `git init` + first commit of the scaffold
+- [x] Keep TypeScript (decision reversed from the original plan)
+- [x] Move the Stitch `<style>` block into `src/index.css`
+- [x] Turn `index.html` into the Vite shell (`#root` + module script), keep a backup of the original at `docs/stitch-original.html`
+- [x] Port the design into reusable TSX components (`src/components/*`)
+- [x] React-state theme toggle with `localStorage` persistence + pre-paint restore
+- [x] Fix the `tailwind.config` script order so `darkMode: 'class'` actually applies
+- [ ] Install `tailwindcss@4` + `@tailwindcss/vite` (optional, needs a class audit)
 - [ ] Add Vite alias `@ → src` and dev proxy `/api → http://localhost:5000`
 - [ ] Replace Vite favicon with the NNN logo; download the external logo into `src/assets`
 - [ ] Set up `server/` (Express, Mongoose, `.env.example`) and a `/api/health` endpoint
 
 ### Phase 1 — Shell + auth (2–3 days)
-- [ ] Build `AppShell` (BrandIsland + IslandNav + Outlet + CommandPalette portal + toast host)
-- [ ] Theme provider with persistence
+- [ ] Add `react-router` and turn `StudioHub` into a route outlet
+- [x] Theme provider with persistence
 - [ ] Pages 1–4: sign in, sign up, forgot/reset password
 - [ ] `User` + `UserSettings` models, JWT access/refresh, `GET /api/auth/me`
 - [ ] Protected-route wrapper, auth store (Zustand)
@@ -318,7 +352,7 @@ connectly/
 
 Build in this order so that every milestone is demoable end-to-end:
 
-1. **Slice A** — Hub screen ported to React + JS + Tailwind v4 + theme toggle works → *demo: the current `index.html` reproduced in React*
+1. **Slice A** — ✅ DONE: hub screen ported to React + TypeScript, theme toggle works → *demo: the Stitch design reproduced in React*
 2. **Slice B** — Register/login/profile with a real API + DB → *demo: sign up and persist a profile*
 3. **Slice C** — Friends + presence → *demo: two browsers see each other online*
 4. **Slice D** — Real-time messaging → *demo: chat between two accounts*
@@ -329,21 +363,20 @@ Build in this order so that every milestone is demoable end-to-end:
 
 ---
 
-## 9. Immediate Next Actions (recommended first 3 commits)
+## 9. Immediate Next Actions (recommended next 3 commits)
 
-1. `git init` + commit the scaffold as `chore: baseline vite react scaffold`
-2. `refactor: convert project from typescript to javascript` — rename files, delete tsconfigs, fix eslint + build script
-3. `feat: add tailwind v4 with NNN studio design tokens` — install Tailwind, move the prototype's tokens into `@theme`, port the `index.html` hub into React components (`BrandIsland`, `IslandNav`, `GlassCard`, `ModuleCard`, `QuickActions`)
-
-After those three commits the project will have a real foundation, and this status file should be updated with the new completion percentages.
+1. `feat: render the stitch design through react` — ported components, shell `index.html`, theme toggle (already staged in the working tree)
+2. `feat: add react router and stub the 20 studio routes` — `react-router` dependency, `AppShell` with an `<Outlet />`, protected-route wrapper
+3. `feat: stand up the express + mongodb api` — `server/` workspace with `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me` and a `User` model
 
 ---
 
 ## 10. Definition of Done (v1.0)
 
 - [ ] All 20 pages implemented and reachable through the island navigation
-- [ ] No TypeScript anywhere: no `.ts`/`.tsx` files, no `tsconfig`, no `typescript` dependency
-- [ ] Tailwind installed as a dependency (no CDN), dark mode persisted
+- [x] TypeScript kept throughout: no `.ts`/`.tsx` converted to JavaScript, `tsconfig*` intact
+- [x] Dark mode persisted and driven by the theme toggle button (`darkMode: 'class'` verified working)
+- [ ] Tailwind installed as a dependency (no CDN) — optional, needs a class audit
 - [ ] Auth (register/login/refresh/logout) + protected routes working
 - [ ] Friends, presence, real-time messaging, and 1:1 + group video calls working
 - [ ] Studio tools (camera, inspector, code) and settings implemented
