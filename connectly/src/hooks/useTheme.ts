@@ -13,6 +13,11 @@ function readInitialTheme(): Theme {
   const saved = window.localStorage.getItem(STORAGE_KEY)
   if (saved === 'dark' || saved === 'light') return saved
 
+  // Respect the system preference when nothing has been saved yet.
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+    return 'light'
+  }
+
   return 'dark'
 }
 

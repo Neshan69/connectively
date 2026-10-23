@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [values, setValues] = useState<LoginValues>({ email: '', password: '' })
   const [errors, setErrors] = useState<LoginErrors>({})
   const [status, setStatus] = useState<string | null>(null)
+  const [forgotNotice, setForgotNotice] = useState(false)
 
   function updateField(field: keyof LoginValues) {
     return (value: string) => {
@@ -99,6 +100,27 @@ export default function LoginPage() {
           autoComplete="current-password"
           revealable
         />
+
+        <div className="flex justify-end -mt-1">
+          <button
+            type="button"
+            onClick={() => setForgotNotice(true)}
+            className="text-[11px] font-medium text-[#0071E3] dark:text-[#2997FF] hover:underline"
+          >
+            Forgot password?
+          </button>
+        </div>
+
+        {forgotNotice && (
+          <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-[#0071E3]/[0.06] dark:bg-[#2997FF]/10 border border-[#0071E3]/15 dark:border-[#2997FF]/20">
+            <span className="material-symbols-outlined text-[15px] text-[#0071E3] dark:text-[#2997FF] shrink-0 mt-px">
+              info
+            </span>
+            <p className="text-[11px] text-[#6E6E73] dark:text-[#A1A1A6] leading-relaxed">
+              Password recovery is UI-only in this milestone — there is no email service connected yet.
+            </p>
+          </div>
+        )}
 
         {status && (
           <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-[#0071E3]/[0.06] dark:bg-[#2997FF]/10 border border-[#0071E3]/15 dark:border-[#2997FF]/20">

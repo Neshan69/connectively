@@ -1,4 +1,5 @@
 import { useLocation } from 'react-router-dom'
+import AccountMenu from './AccountMenu'
 import IslandButton from './IslandButton'
 import { useStudioUi } from '../context/StudioUiContext'
 import type { Theme } from '../types/studio'
@@ -37,17 +38,14 @@ export default function IslandNav({ theme, onToggleTheme }: IslandNavProps) {
           </div>
         </div>
 
-        {/* 2. Profile section button / avatar trigger */}
-        <IslandButton
-          label="My Profile"
-          onClick={() => select('profile')}
-          padding="p-2"
-          active={isActive('profile', '/profile')}
-        >
-          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#0071E3] to-[#5AC8FA] text-white flex items-center justify-center shadow-xs">
-            <span className="material-symbols-outlined text-[17px]">account_circle</span>
-          </div>
-        </IslandButton>
+        {/* 2. Profile section button / account menu trigger */}
+        <AccountMenu
+          trigger={
+            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#0071E3] to-[#5AC8FA] text-white flex items-center justify-center shadow-xs">
+              <span className="material-symbols-outlined text-[17px]">account_circle</span>
+            </div>
+          }
+        />
 
         {/* 3. Dark Mode / Light Mode toggle switch */}
         <IslandButton
@@ -69,6 +67,7 @@ export default function IslandNav({ theme, onToggleTheme }: IslandNavProps) {
           label="Friends & Creative Connections"
           icon="group"
           onClick={() => select('friends')}
+          active={isActive('friends', '/friends')}
         />
 
         {/* Divider Line */}

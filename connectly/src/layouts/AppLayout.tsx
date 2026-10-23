@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import ActionToast from '../components/ActionToast'
 import AmbientOrbs from '../components/AmbientOrbs'
+import { AuthProvider } from '../context/AuthProvider'
 import BrandIsland from '../components/BrandIsland'
 import IslandNav from '../components/IslandNav'
 import { useStudioUi } from '../context/StudioUiContext'
@@ -26,12 +27,14 @@ export default function AppLayout() {
   const { theme, toggleTheme } = useTheme()
 
   return (
-    <StudioUiProvider>
-      <AmbientOrbs />
-      <BrandIsland />
-      <IslandNav theme={theme} onToggleTheme={toggleTheme} />
-      <Outlet />
-      <StudioNotice />
-    </StudioUiProvider>
+    <AuthProvider>
+      <StudioUiProvider>
+        <AmbientOrbs />
+        <BrandIsland />
+        <IslandNav theme={theme} onToggleTheme={toggleTheme} />
+        <Outlet />
+        <StudioNotice />
+      </StudioUiProvider>
+    </AuthProvider>
   )
 }

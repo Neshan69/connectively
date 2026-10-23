@@ -37,8 +37,12 @@ export type StudioAction = {
  */
 export const STUDIO_ROUTES: Partial<Record<StudioModuleId, string>> = {
   profile: '/profile',
-  messages: '/messages',
+  friends: '/friends',
+  messages: '/connect?action=message',
   settings: '/settings',
+  'video-call': '/connect?action=video',
+  'audio-room': '/connect?action=audio',
+  'quick-connect': '/connect',
 }
 
 export const STUDIO_ACTIONS: Record<StudioModuleId, StudioAction> = {
