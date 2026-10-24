@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import AccountSettingsPage from './pages/AccountSettingsPage'
 import AppLayout from './layouts/AppLayout'
 import AudioCallPage from './pages/AudioCallPage'
 import ConnectPage from './pages/ConnectPage'
@@ -27,6 +28,7 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/audio/:roomId" element={<AudioCallPage />} />
+          <Route path="/account" element={<ProtectedRoute><AccountSettingsPage /></ProtectedRoute>} />
           <Route path="/call/:roomId" element={<VideoCallPage />} />
           <Route path="/connect" element={<ConnectPage />} />
           <Route path="/friends" element={<ProtectedRoute><FriendsPage /></ProtectedRoute>} />
