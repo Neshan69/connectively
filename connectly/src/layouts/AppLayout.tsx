@@ -28,13 +28,20 @@ export default function AppLayout() {
 
   return (
     <AuthProvider>
-      <StudioUiProvider>
-        <AmbientOrbs />
-        <BrandIsland />
-        <IslandNav theme={theme} onToggleTheme={toggleTheme} />
+    <StudioUiProvider>
+      {/* Background dot grid — isolated layer, never captures pointer events */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-0 apple-grid"
+      />
+      <AmbientOrbs />
+      <BrandIsland />
+      <IslandNav theme={theme} onToggleTheme={toggleTheme} />
+      <div className="relative z-10">
         <Outlet />
-        <StudioNotice />
-      </StudioUiProvider>
+      </div>
+      <StudioNotice />
+    </StudioUiProvider>
     </AuthProvider>
   )
 }
