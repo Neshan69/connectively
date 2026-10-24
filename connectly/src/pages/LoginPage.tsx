@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import AuthCard from '../components/AuthCard'
 import FormField from '../components/FormField'
+import { useAuth } from '../context/AuthContext'
 import { isValidEmail } from '../utils/validation'
 
 type LoginValues = {
@@ -12,10 +13,13 @@ type LoginValues = {
 type LoginErrors = Partial<Record<keyof LoginValues, string>>
 
 export default function LoginPage() {
+  const { signIn } = useAuth()
+  const navigate = useNavigate()
   const [values, setValues] = useState<LoginValues>({ email: '', password: '' })
   const [errors, setErrors] = useState<LoginErrors>({})
   const [status, setStatus] = useState<string | null>(null)
   const [forgotNotice, setForgotNotice] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   function updateField(field: keyof LoginValues) {
     return (value: string) => {
@@ -24,7 +28,7 @@ export default function LoginPage() {
     }
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const nextErrors: LoginErrors = {}
@@ -41,10 +45,17 @@ export default function LoginPage() {
 
     setErrors(nextErrors)
 
-    if (Object.keys(nextErrors).length === 0) {
-      setStatus(
-        'Sign-in is UI only - there is no authentication service in this milestone, so nothing was submitted.',
-      )
+    if (Object.keys(nextErrors).length > 0) return
+
+    setSubmitting(true)
+    setStatus(null)
+    try {
+      await signIn(values.email, values.password)
+      navigate('/')
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Sign-in failed.')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -53,7 +64,7 @@ export default function LoginPage() {
       icon="lock_person"
       title="Welcome back"
       subtitle="Sign in to your NNN Studio workspace."
-      notice="This milestone has no backend. The form only checks the input in your browser."
+      notice="Sign in with your Supabase account. Email confirmation may be required."
       footer={
         <>
           <p>
@@ -135,10 +146,11 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          className="w-full px-6 py-2.5 rounded-full bg-[#0071E3] hover:bg-[#0077ED] dark:bg-[#0071E3] dark:hover:bg-[#0A84FF] active:scale-95 text-white font-medium text-[13px] shadow-sm transition-all flex items-center justify-center gap-2"
+          disabled={submitting}
+          className="w-full px-6 py-2.5 rounded-full bg-[#0071E3] hover:bg-[#0077ED] dark:bg-[#0071E3] dark:hover:bg-[#0A84FF] active:scale-95 text-white font-medium text-[13px] shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <span className="material-symbols-outlined text-[17px]">login</span>
-          Sign in
+          {submitting ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
     </AuthCard>

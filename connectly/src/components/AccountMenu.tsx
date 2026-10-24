@@ -13,7 +13,7 @@ type AccountMenuProps = {
  * (profile / settings / sign out) variant later.
  */
 export default function AccountMenu({ trigger }: AccountMenuProps) {
-  const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated, user, signOut } = useAuth()
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -128,7 +128,10 @@ export default function AccountMenu({ trigger }: AccountMenuProps) {
               <button
                 type="button"
                 role="menuitem"
-                onClick={() => setOpen(false)}
+                onClick={async () => {
+                  setOpen(false)
+                  await signOut()
+                }}
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-medium text-red-500 dark:text-red-400 hover:bg-red-500/10 transition-colors"
               >
                 <span className="material-symbols-outlined text-[17px]">logout</span>

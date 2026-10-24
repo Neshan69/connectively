@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import AuthCard from '../components/AuthCard'
 import FormField from '../components/FormField'
+import { useAuth } from '../context/AuthContext'
 import { isValidEmail, isValidPassword, PASSWORD_MIN_LENGTH } from '../utils/validation'
 
 type SignupValues = {
@@ -14,6 +15,7 @@ type SignupValues = {
 type SignupErrors = Partial<Record<keyof SignupValues, string>>
 
 export default function SignupPage() {
+  const { signUp } = useAuth()
   const [values, setValues] = useState<SignupValues>({
     name: '',
     email: '',
@@ -22,6 +24,7 @@ export default function SignupPage() {
   })
   const [errors, setErrors] = useState<SignupErrors>({})
   const [status, setStatus] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
   function updateField(field: keyof SignupValues) {
     return (value: string) => {
@@ -61,16 +64,23 @@ export default function SignupPage() {
     return nextErrors
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const nextErrors = validate()
     setErrors(nextErrors)
 
-    if (Object.keys(nextErrors).length === 0) {
-      setStatus(
-        'Registration is UI only - there is no account service in this milestone, so no account was created.',
-      )
+    if (Object.keys(nextErrors).length > 0) return
+
+    setSubmitting(true)
+    setStatus(null)
+    try {
+      await signUp(values.name, values.email, values.password)
+      setStatus('Account created. Check your email to confirm, then sign in.')
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Registration failed.')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -79,7 +89,7 @@ export default function SignupPage() {
       icon="person_add"
       title="Create your account"
       subtitle="Join NNN Studio and start building your creative workspace."
-      notice="This milestone has no backend. The form only checks the input in your browser."
+      notice="Create a real account via Supabase. Email confirmation may be required."
       footer={
         <>
           <p>
@@ -162,10 +172,11 @@ export default function SignupPage() {
 
         <button
           type="submit"
-          className="w-full px-6 py-2.5 rounded-full bg-[#0071E3] hover:bg-[#0077ED] dark:bg-[#0071E3] dark:hover:bg-[#0A84FF] active:scale-95 text-white font-medium text-[13px] shadow-sm transition-all flex items-center justify-center gap-2"
+          disabled={submitting}
+          className="w-full px-6 py-2.5 rounded-full bg-[#0071E3] hover:bg-[#0077ED] dark:bg-[#0071E3] dark:hover:bg-[#0A84FF] active:scale-95 text-white font-medium text-[13px] shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <span className="material-symbols-outlined text-[17px]">how_to_reg</span>
-          Create account
+          {submitting ? 'Creating…' : 'Create account'}
         </button>
       </form>
     </AuthCard>
